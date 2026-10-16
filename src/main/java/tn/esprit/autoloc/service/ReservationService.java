@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.*;
-import tn.esprit.autoloc.exception.BusinessException;
+import tn.esprit.autoloc.domain.exception.BusinessException;
 import tn.esprit.autoloc.domain.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.repository.ClientRepository;
 import tn.esprit.autoloc.repository.ReservationRepository;

@@ -7,7 +7,7 @@ import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.Equipement;
 import tn.esprit.autoloc.domain.StatutVehicule;
 import tn.esprit.autoloc.domain.Vehicule;
-import tn.esprit.autoloc.exception.BusinessException;
+import tn.esprit.autoloc.domain.exception.BusinessException;
 import tn.esprit.autoloc.domain.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.repository.AgenceRepository;
 import tn.esprit.autoloc.repository.EquipementRepository;
