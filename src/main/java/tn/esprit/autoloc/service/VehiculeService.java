@@ -5,19 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.Equipement;
-import tn.esprit.autoloc.domain.StatutVehicule;
 import tn.esprit.autoloc.domain.Vehicule;
-import tn.esprit.autoloc.domain.exception.BusinessException;
 import tn.esprit.autoloc.domain.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.repository.AgenceRepository;
 import tn.esprit.autoloc.repository.EquipementRepository;
 import tn.esprit.autoloc.repository.VehiculeRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class VehiculeService implements IVehiculeService {
 
@@ -26,70 +22,68 @@ public class VehiculeService implements IVehiculeService {
     private final EquipementRepository equipementRepository;
 
     @Override
-    public Vehicule ajouterVehicule(Vehicule vehicule, Long idAgence) {
-        if (vehiculeRepository.findByImmatriculation(vehicule.getImmatriculation()).isPresent()) {
-            throw new BusinessException("Immatriculation déjà existante : " + vehicule.getImmatriculation());
-        }
-        Agence agence = agenceRepository.findById(idAgence)
-                .orElseThrow(() -> new ResourceNotFoundException("Agence introuvable avec l'ID : " + idAgence));
-
-        vehicule.setAgence(agence);
-        if (vehicule.getStatut() == null) {
-            vehicule.setStatut(StatutVehicule.DISPONIBLE);
-        }
+    public Vehicule ajouterVehicule(Vehicule vehicule) {
         return vehiculeRepository.save(vehicule);
     }
 
     @Override
-    public Vehicule modifierVehicule(Long id, Vehicule vehiculeModifie) {
-        Vehicule v = obtenirVehiculeParId(id);
-        v.setMarque(vehiculeModifie.getMarque());
-        v.setModele(vehiculeModifie.getModele());
-        v.setCategorie(vehiculeModifie.getCategorie());
-        v.setTarifJournalier(vehiculeModifie.getTarifJournalier());
-        return vehiculeRepository.save(v);
+    public Vehicule modifierVehicule(Long id, Vehicule vehiculeDetails) {
+        Vehicule vehicule = obtenirVehiculeParId(id);
+        vehicule.setImmatriculation(vehiculeDetails.getImmatriculation());
+        vehicule.setMarque(vehiculeDetails.getMarque());
+        vehicule.setModele(vehiculeDetails.getModele());
+
+        vehicule.setStatut(vehiculeDetails.getStatut());
+        vehicule.setCategorie(vehiculeDetails.getCategorie());
+        return vehiculeRepository.save(vehicule);
     }
 
     @Override
     public void supprimerVehicule(Long id) {
-        Vehicule v = obtenirVehiculeParId(id);
-        vehiculeRepository.delete(v);
+        Vehicule vehicule = obtenirVehiculeParId(id);
+        vehiculeRepository.delete(vehicule);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Vehicule obtenirVehiculeParId(Long id) {
         return vehiculeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Véhicule introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Véhicule non trouvé avec l'ID : " + id));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Vehicule> obtenirTousVehicules() {
         return vehiculeRepository.findAll();
     }
 
     @Override
-    public Vehicule changerStatutVehicule(Long idVehicule, StatutVehicule nouveauStatut) {
-        Vehicule v = obtenirVehiculeParId(idVehicule);
-        v.setStatut(nouveauStatut);
-        return vehiculeRepository.save(v);
+    @Transactional
+    public Vehicule affecterVehicule(Long idVehicule, Long idAgence) {
+        Vehicule vehicule = obtenirVehiculeParId(idVehicule);
+        Agence agence = agenceRepository.findById(idAgence)
+                .orElseThrow(() -> new ResourceNotFoundException("Agence non trouvée avec l'ID : " + idAgence));
+        vehicule.setAgence(agence);
+        return vehiculeRepository.save(vehicule);
     }
 
     @Override
-    public Vehicule affecterEquipementsAuVehicule(Long idVehicule, List<Long> idsEquipements) {
-        Vehicule v = obtenirVehiculeParId(idVehicule);
-        List<Equipement> equipements = equipementRepository.findAllById(idsEquipements);
-        v.getEquipements().addAll(equipements);
-        return vehiculeRepository.save(v);
+    @Transactional
+    public Vehicule affecterEquipement(Long idVehicule, Long idEquipement) {
+        Vehicule vehicule = obtenirVehiculeParId(idVehicule);
+        Equipement equipement = equipementRepository.findById(idEquipement)
+                .orElseThrow(() -> new ResourceNotFoundException("Équipement non trouvé avec l'ID : " + idEquipement));
+
+        vehicule.getEquipements().add(equipement);
+        return vehiculeRepository.save(vehicule);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Vehicule> rechercherVehiculesDisponibles(LocalDate dateDebut, LocalDate dateFin) {
-        if (dateDebut.isAfter(dateFin)) {
-            throw new BusinessException("La date de début doit être antérieure à la date de fin.");
-        }
-        return vehiculeRepository.findVehiculesDisponiblesPourPeriode(dateDebut, dateFin);
+    @Transactional
+    public Vehicule desaffecterEquipement(Long idVehicule, Long idEquipement) {
+        Vehicule vehicule = obtenirVehiculeParId(idVehicule);
+        Equipement equipement = equipementRepository.findById(idEquipement)
+                .orElseThrow(() -> new ResourceNotFoundException("Équipement non trouvé avec l'ID : " + idEquipement));
+
+        vehicule.getEquipements().remove(equipement);
+        return vehiculeRepository.save(vehicule);
     }
 }

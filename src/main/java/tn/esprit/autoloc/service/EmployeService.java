@@ -12,7 +12,6 @@ import tn.esprit.autoloc.repository.EmployeRepository;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class EmployeService implements IEmployeService {
 
@@ -20,44 +19,67 @@ public class EmployeService implements IEmployeService {
     private final AgenceRepository agenceRepository;
 
     @Override
-    public Employe ajouterEmploye(Employe employe, Long idAgence) {
-        Agence agence = agenceRepository.findById(idAgence)
-                .orElseThrow(() -> new ResourceNotFoundException("Agence introuvable ID : " + idAgence));
-        employe.setAgence(agence);
+    public Employe ajouterEmploye(Employe employe) {
         return employeRepository.save(employe);
     }
 
     @Override
-    public Employe modifierEmploye(Long id, Employe employeModifie) {
-        Employe emp = obtenirEmployeParId(id);
-        emp.setNom(employeModifie.getNom());
-        emp.setPrenom(employeModifie.getPrenom());
-        emp.setRole(employeModifie.getRole());
-        return employeRepository.save(emp);
+    @Transactional
+    public Employe ajouterEmploye(Employe employe, Long idAgence) {
+        if (idAgence != null) {
+            Agence agence = agenceRepository.findById(idAgence)
+                    .orElseThrow(() -> new ResourceNotFoundException("Agence non trouvée avec l'ID : " + idAgence));
+            employe.setAgence(agence);
+        }
+        return employeRepository.save(employe);
+    }
+
+    @Override
+    public Employe modifierEmploye(Long id, Employe employeDetails) {
+        Employe employe = obtenirEmployeParId(id);
+        employe.setNom(employeDetails.getNom());
+        employe.setPrenom(employeDetails.getPrenom());
+        employe.setRole(employeDetails.getRole());
+        return employeRepository.save(employe);
     }
 
     @Override
     public void supprimerEmploye(Long id) {
-        Employe emp = obtenirEmployeParId(id);
-        employeRepository.delete(emp);
+        Employe employe = obtenirEmployeParId(id);
+        employeRepository.delete(employe);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Employe obtenirEmployeParId(Long id) {
         return employeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employé introuvable ID : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Employé non trouvé avec l'ID : " + id));
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public List<Employe> obtenirTousEmployes() {
+        return employeRepository.findAll();
+    }
+
+    @Override
     public List<Employe> obtenirEmployesParAgence(Long idAgence) {
         return employeRepository.findByAgenceIdAgence(idAgence);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Employe> obtenirTousEmployes() {
-        return employeRepository.findAll();
+    @Transactional
+    public Employe desaffecterEmploye(Long idEmploye) {
+        Employe employe = obtenirEmployeParId(idEmploye);
+        employe.setAgence(null);
+        return employeRepository.save(employe);
+    }
+
+    @Override
+    @Transactional
+    public Employe affecterEmploye(Long idEmploye, Long idAgence) {
+        Employe employe = obtenirEmployeParId(idEmploye);
+        Agence agence = agenceRepository.findById(idAgence)
+                .orElseThrow(() -> new ResourceNotFoundException("Agence non trouvée avec l'ID : " + idAgence));
+        employe.setAgence(agence);
+        return employeRepository.save(employe);
     }
 }

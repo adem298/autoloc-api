@@ -5,21 +5,40 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Employe;
-import tn.esprit.autoloc.service.EmployeService;
+import tn.esprit.autoloc.service.IEmployeService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/employes")
 @RequiredArgsConstructor
-@CrossOrigin("*")
 public class EmployeController {
 
-    private final EmployeService employeService;
+    private final IEmployeService employeService;
+
+    @PostMapping
+    public ResponseEntity<Employe> ajouterEmploye(@RequestBody Employe employe) {
+        return new ResponseEntity<>(employeService.ajouterEmploye(employe), HttpStatus.CREATED);
+    }
 
     @PostMapping("/agence/{idAgence}")
-    public ResponseEntity<Employe> ajouterEmploye(@RequestBody Employe employe, @PathVariable Long idAgence) {
+    public ResponseEntity<Employe> ajouterEmployeEtAffecter(@RequestBody Employe employe, @PathVariable Long idAgence) {
         return new ResponseEntity<>(employeService.ajouterEmploye(employe, idAgence), HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Employe>> obtenirTousEmployes() {
+        return ResponseEntity.ok(employeService.obtenirTousEmployes());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Employe> obtenirEmployeParId(@PathVariable Long id) {
+        return ResponseEntity.ok(employeService.obtenirEmployeParId(id));
+    }
+
+    @GetMapping("/agence/{idAgence}")
+    public ResponseEntity<List<Employe>> obtenirEmployesParAgence(@PathVariable Long idAgence) {
+        return ResponseEntity.ok(employeService.obtenirEmployesParAgence(idAgence));
     }
 
     @PutMapping("/{id}")
@@ -33,18 +52,13 @@ public class EmployeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Employe> obtenirEmployeParId(@PathVariable Long id) {
-        return ResponseEntity.ok(employeService.obtenirEmployeParId(id));
+    @PutMapping("/{idEmploye}/desaffecter")
+    public ResponseEntity<Employe> desaffecterEmploye(@PathVariable Long idEmploye) {
+        return ResponseEntity.ok(employeService.desaffecterEmploye(idEmploye));
     }
 
-    @GetMapping("/agence/{idAgence}")
-    public ResponseEntity<List<Employe>> obtenirEmployesParAgence(@PathVariable Long idAgence) {
-        return ResponseEntity.ok(employeService.obtenirEmployesParAgence(idAgence));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Employe>> obtenirTousEmployes() {
-        return ResponseEntity.ok(employeService.obtenirTousEmployes());
+    @PutMapping("/{idEmploye}/affecter-agence/{idAgence}")
+    public ResponseEntity<Employe> affecterEmploye(@PathVariable Long idEmploye, @PathVariable Long idAgence) {
+        return ResponseEntity.ok(employeService.affecterEmploye(idEmploye, idAgence));
     }
 }

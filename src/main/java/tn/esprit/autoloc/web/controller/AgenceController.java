@@ -1,5 +1,7 @@
 package tn.esprit.autoloc.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,13 +12,14 @@ import tn.esprit.autoloc.service.AgenceService;
 import java.util.List;
 
 @RestController
+@Tag(name="Gestion Agence")
 @RequestMapping("/api/agences")
 @RequiredArgsConstructor
 @CrossOrigin("*")
 public class AgenceController {
 
     private final AgenceService agenceService;
-
+    @Operation(description="ajouter un objet agence dans la bd")
     @PostMapping
     public ResponseEntity<Agence> ajouterAgence(@RequestBody Agence agence) {
         return new ResponseEntity<>(agenceService.ajouterAgence(agence), HttpStatus.CREATED);

@@ -1,5 +1,6 @@
 package tn.esprit.autoloc.web.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@Tag(name="Gestion Reservation")
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
 @CrossOrigin("*")
